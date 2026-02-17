@@ -84,12 +84,16 @@ export function useBookmarks(userId: string | undefined) {
   );
 
   const deleteBookmark = useCallback(async (id: string) => {
+    setBookmarks((prev) => prev.filter((b) => b.id !== id));
     const { error } = await supabase
       .from("bookmarks")
       .delete()
       .eq("id", id);
-    if (error) throw new Error(error.message);
-  }, []);
+    if (error) {
+      fetchBookmarks();
+      throw new Error(error.message);
+    }
+  }, [fetchBookmarks]);
 
   return { bookmarks, loading, error, addBookmark, deleteBookmark, refetch: fetchBookmarks };
 }
