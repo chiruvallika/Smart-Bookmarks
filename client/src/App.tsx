@@ -1,30 +1,33 @@
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/not-found";
-
-function Router() {
-  return (
-    <Switch>
-      {/* Add pages below */}
-      {/* <Route path="/" component={Home}/> */}
-      {/* Fallback to 404 */}
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
+import { ThemeProvider } from "@/components/theme-provider";
+import { LoginPage } from "@/components/login-page";
+import { Dashboard } from "@/components/dashboard";
+import { useAuth } from "@/hooks/use-auth";
+import { Loader2 } from "lucide-react";
 
 function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
-    </QueryClientProvider>
+  const { user, loading, signInWithGoogle, signOut } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  return user ? (
+    <Dashboard user={user} onSignOut={signOut} />
+  ) : (
+    <LoginPage onSignIn={signInWithGoogle} loading={loading} />
   );
 }
 
-export default App;
+export default function AppWithProviders() {
+  return (
+    <ThemeProvider>
+      <App />
+      <Toaster />
+    </ThemeProvider>
+  );
+}
